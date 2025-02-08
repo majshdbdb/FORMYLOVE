@@ -3,19 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Login</title>
+    <title>Video Platform</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            width: 90%;
+            height: auto;
+            padding: 20px;
+            margin: auto;
+        }
+        .video-item {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .video-item video {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .not-found, .restricted-warning {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: red;
+            display: none;
+            margin-top: 20px;
+        }
+        @media (max-width: 600px) {
+            .video-grid {
+                grid-template-columns: 1fr;
+                width: 100%;
+                padding: 10px;
+            }
+            .video-item {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Form Login</h1>
-    <form action="save_data.php" method="POST">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br><br>
-<form action="save_data.php" method="POST">
-        
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br><br>
-        
-        <button type="submit">Submit</button>
-    </form>
+    <header>
+        <h1>My Video Platform</h1>
+        <input type="text" id="search" placeholder="Search videos..." onkeyup="searchVideos()">
+    </header>
+    
+    <main>
+        <div class="video-grid" id="videoContainer">
+            <div class="video-item" data-title="Video Title 1" onclick="openVideo('CONTENT/content2.mp4', 'Video Title 1', 'LAGI MABAR SAMA SUDARA')">
+                <video>
+                    <source src="CONTENT/content2.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <p>Video Title 1</p>
+            </div>
+            <div class="video-item" data-title="Video Title 2" onclick="openVideo('video2.mp4', 'Video Title 2', 'Deskripsi video kedua.')">
+                <video>
+                    <source src="video2.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <p>Video Title 2</p>
+            </div>
+        </div>
+        <p class="not-found" id="notFoundMessage">Mohon maaf, video yang Anda cari tidak ditemukan.</p>
+        <p class="restricted-warning" id="restrictedWarning"></p>
+    </main>
+    
+    <script>
+        function openVideo(videoSrc, title, description) {
+            let newPage = window.open("", "_blank");
+            newPage.document.write(`
+                <html>
+                <head>
+                    <title>${title}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; text-align: center; }
+                        video { width: 80%; max-width: 800px; height: auto; }
+                        .description { margin-top: 20px; font-size: 18px; }
+                        .fullscreen-btn { margin-top: 10px; padding: 10px; font-size: 16px; cursor: pointer; }
+                    </style>
+                </head>
+                <body>
+                    <h1>${title}</h1>
+                    <video id="videoPlayer" controls>
+                        <source src="${videoSrc}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <br>
+                    <button class="fullscreen-btn" onclick="toggleFullscreen()">Perbesar Video</button>
+                    <p class="description">${description}</p>
+                    <script>
+                        function toggleFullscreen() {
+                            let video = document.getElementById("videoPlayer");
+                            if (!document.fullscreenElement) {
+                                video.requestFullscreen();
+                            } else {
+                                document.exitFullscreen();
+                            }
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `);
+        }
+
+        let warningCount = 0;
+        function searchVideos() {
+            let input = document.getElementById('search').value.toLowerCase();
+            let videos = document.querySelectorAll('.video-item');
+            let found = false;
+            let restrictedWords = ['bocil', 'bocah', 'gay', 'homo', 'anak'];
+            let restrictedWarning = document.getElementById('restrictedWarning');
+            
+            if (restrictedWords.some(word => input.includes(word))) {
+                warningCount++;
+                restrictedWarning.textContent = `Mohon maaf, video yang Anda cari tidak ditemukan karena melanggar hukum atau kebencian lainnya. Jika Anda mengulangi hal ini ${3 - warningCount} kali lagi, Anda akan terblokir atau terlacak.`;
+                restrictedWarning.style.display = 'block';
+                
+                if (warningCount >= 3) {
+                    alert("Anda telah diblokir karena melanggar kebijakan pencarian.");
+                    document.getElementById('search').disabled = true;
+                }
+                return;
+            }
+            restrictedWarning.style.display = 'none';
+            
+            videos.forEach(video => {
+                let title = video.getAttribute('data-title').toLowerCase();
+                if (title.includes(input)) {
+                    video.style.display = 'block';
+                    found = true;
+                } else {
+                    video.style.display = 'none';
+                }
+            });
+            
+            document.getElementById('notFoundMessage').style.display = found ? 'none' : 'block';
+        }
+    </script>
 </body>
 </html>
