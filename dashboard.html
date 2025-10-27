@@ -1,29 +1,407 @@
-async function checkAuth() {
-            const { data: { user } } = await window.supabase.auth.getUser();
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Web Login</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.0"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .header h1 {
+            color: #333;
+            margin: 0;
+            font-size: 28px;
+        }
+        
+        .logout-btn { 
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white; 
+            padding: 12px 25px; 
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .logout-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+        }
+        
+        .logout-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .welcome-section { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px 40px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: rgba(255,255,255,0.1);
+            transform: rotate(45deg);
+        }
+        
+        .welcome-section h2 {
+            font-size: 32px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .welcome-section p {
+            font-size: 18px;
+            opacity: 0.9;
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .user-info-card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 0 auto;
+            max-width: 400px;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .user-info-item {
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .user-info-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .user-info-item strong {
+            font-weight: 600;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 30px 25px;
+                    border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .feature-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        
+        .login-prompt {
+            text-align: center;
+            padding: 60px 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin: 50px auto;
+            max-width: 500px;
+        }
+        
+        .login-prompt h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        
+        .login-prompt p {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 16px;
+        }
+        
+        .login-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
             
-            if (user) {
-                document.getElementById('userEmail').textContent = user.email;
-                document.getElementById('userId').textContent = user.id.substring(0, 8) + '...';
-                document.getElementById('userInfo').style.display = 'block';
-                document.getElementById('loginPrompt').style.display = 'none';
-            } else {
-                document.getElementById('userInfo').style.display = 'none';
-                document.getElementById('loginPrompt').style.display = 'block';
+            .welcome-section {
+                padding: 40px 20px;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Dashboard</h1>
+        <button class="logout-btn" onclick="logout()" id="logoutBtn">🚪 Logout</button>
+    </div>
+    
+    <!-- Content for logged in users -->
+    <div id="userContent">
+        <div class="welcome-section">
+            <h2>Selamat Datang! 🎉</h2>
+            <p>Anda berhasil login ke sistem WebLogin</p>
+            
+            <div class="user-info-card">
+                <div class="user-info-item">
+                    <strong>Email:</strong> 
+                    <span id="userEmail">Loading...</span>
+                </div>
+                <div class="user-info-item">
+                    <strong>User ID:</strong> 
+                    <span id="userId">Loading...</span>
+                </div>
+                <div class="user-info-item">
+                    <strong>Status:</strong> 
+                    <span style="color: #90ee90;">✓ Aktif</span>
+                </div>
+            </div>
+            </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="loginCount">1</div>
+                <div class="stat-label">Login Hari Ini</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Keamanan Akun</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Akses Tersedia</div>
+            </div>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">👤</div>
+                <h3>Profile Management</h3>
+                <p>Kelola informasi profil dan preferensi akun Anda dengan mudah</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⚙️</div>
+                <h3>Account Settings</h3>
+                <p>Ubah pengaturan akun, notifikasi, dan preferensi keamanan</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔐</div>
+                <h3>Security Center</h3>
+                <p>Pantau aktivitas akun dan tingkatkan keamanan login</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Activity Log</h3>
+                <p>Lihat riwayat login dan aktivitas terbaru pada akun Anda</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Content for non-logged in users -->
+    <div id="loginPrompt" class="login-prompt" style="display: none;">
+        <h2>Anda Belum Login</h2>
+        <p>Silakan login terlebih dahulu untuk mengakses dashboard</p>
+        <a href="login.html" class="login-btn">Login Sekarang</a>
+    </div>
+
+    <!-- Load config.js -->
+    <script src="js/config.js"></script>
+    
+    <script>
+        // Tunggu sampai DOM siap
+        document.addEventListener('DOMContentLoaded', async function() {
+            await checkAuth();
+        });
+
+        // Check authentication
+        async function checkAuth() {
+            const userContent = document.getElementById('userContent');
+            const loginPrompt = document.getElementById('loginPrompt');
+            const logoutBtn = document.getElementById('logoutBtn');
+            
+            try {
+                console.log('Checking authentication...');
+                const { data: { user }, error } = await window.supabase.auth.getUser();
+                
+                if (error) {
+                    console.error('Auth check error:', error);
+                    throw error;
+                }
+                
+                if (user) {
+                    console.log('User authenticated:', user);
+                    // Show user content
+                    userContent.style.display = 'block';
+                    loginPrompt.style.display = 'none';
+                    
+                    // Update user info
+                    document.getElementById('userEmail').textContent = user.email;
+                    document.getElementById('userId').textContent = user.id.substring(0, 12) + '...';
+                    
+                } else {
+                    console.log('No user found');
+                    // Show login prompt
+                    userContent.style.display = 'none';
+                    loginPrompt.style.display = 'block';
+                }
+                
+            } catch (error) {
+                console.error('Error in checkAuth:', error);
+                userContent.style.display = 'none';
+                loginPrompt.style.display = 'block';
             }
         }
 
         // Logout function
-        async function logout() {
-            const button = document.querySelector('.logout');
-            button.textContent = 'Logging out...';
-            button.disabled = true;
+                async function logout() {
+            const logoutBtn = document.getElementById('logoutBtn');
             
-            await window.supabase.auth.signOut();
-            window.location.href = 'login.html';
+            // Show loading state
+            logoutBtn.textContent = 'Logging out...';
+            logoutBtn.disabled = true;
+            
+            try {
+                console.log('Logging out...');
+                const { error } = await window.supabase.auth.signOut();
+                
+                if (error) {
+                    console.error('Logout error:', error);
+                    throw error;
+                }
+                
+                console.log('Logout successful');
+                // Redirect to login page
+                window.location.href = 'login.html';
+                
+            } catch (error) {
+                console.error('Error during logout:', error);
+                alert('Error saat logout: ' + error.message);
+                
+                // Reset button
+                logoutBtn.textContent = '🚪 Logout';
+                logoutBtn.disabled = false;
+            }
         }
-
-        // Check auth on page load
-        checkAuth();
     </script>
 </body>
 </html>
