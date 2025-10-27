@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mahjong Game - Game Center</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+        .game-header {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .game-board {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        .btn {
+            background: #28a745;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0 5px;
+            font-weight: 600;
+        }
+        .back-btn {
+            background: #6c757d;
+        }
+        .balance-info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1>🀄 Mahjong Solitaire</h1>
+        <div class="balance-info">
+            Saldo: Rp <span id="currentBalance">0</span>
+        </div>
+    </div>
+
+    <div class="game-board">
+        <h2>Game Mahjong</h2>
+        <p>Game sedang dalam pengembangan...</p>
+        <div class="game-stats">
+            <p>Biaya game: <strong>Rp 1.000</strong></p>
+            <p>Status: <span style="color: #90ee90;">✓ Sudah dibayar</span></p>
+        </div>
+        <div class="controls">
+            <button class="btn" onclick="startGame()">🎮 Start Game</button>
+            <button class="btn back-btn" onclick="goBack()">← Kembali</button>
+        </div>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://bksguejdlekzodfonqce.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrc2d1ZWpkbGVrem9kZm9ucWNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1NDQ5OTcsImV4cCI6MjA3NzEyMDk5N30.y2s2G1bM08wyVVDeVz35KWb5qtHIrml3QNFLnGmPQNY';
+        window.supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        let currentUser = null;
+
+        // Cek login dan load balance
+        async function initialize() {
+            const { data: { user } } = await window.supabase.auth.getUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            currentUser = user;
+            await loadBalance();
+        }
+
+        // Load saldo
+        async function loadBalance() {
+            const { data, error } = await window.supabase
+                .from('users_profile')
+                .select('balance')
+                .eq('id', currentUser.id)
+                .single();
+
+            if (!error) {
+                document.getElementById('currentBalance').textContent = 
+                    data.balance.toLocaleString('id-ID');
+            }
+        }
+
+        function startGame() {
+            alert('Game Mahjong akan segera hadir! Fitur lengkap sedang dikembangkan.');
+        }
+
+        function goBack() {
+            window.location.href = 'dashboard.html';
+        }
+
+        // Initialize when page loads
+        initialize();
+    </script>
+</body>
+</html>
