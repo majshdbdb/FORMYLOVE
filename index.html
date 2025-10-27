@@ -82,6 +82,17 @@
             background: #5a6fd8;
             transform: translateY(-2px);
         }
+        .admin-link {
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+        .admin-link a {
+            color: #666;
+            text-decoration: none;
+        }
+        .admin-link a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -91,24 +102,29 @@
         
         <div class="game-list">
             <button class="game-btn" onclick="playMahjong()">
-                🀄 Main Mahjong
+                🀄 Main Mahjong - Rp 1.000
             </button>
             <button class="game-btn" onclick="comingSoon()">
+                🎰 Slot Machine - Rp 500 (Coming Soon)
             </button>
             <button class="game-btn" onclick="comingSoon()">
+                ♠️ Poker - Rp 2.000 (Coming Soon)
             </button>
         </div>
 
         <div class="login-prompt">
-            <p>💡 <strong>Login untuk menyimpan score & progress!</strong></p>
+            <p>💡 <strong>Login untuk bermain dan top up saldo!</strong></p>
             <button class="login-btn" onclick="goToLogin()">Login / Daftar</button>
+        </div>
+
+        <div class="admin-link">
+            <a href="admin.html">Admin Access</a>
         </div>
     </div>
 
     <script>
         function playMahjong() {
-            // Cek dulu apakah user sudah login
-            alert('🎮 Memuat game Mahjong...\n\nLogin dulu untuk menyimpan progress!');
+            alert('🎮 Memuat game Mahjong...\n\nLogin dulu untuk bermain!');
             goToLogin();
         }
 
