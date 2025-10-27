@@ -3,257 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Web Login</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.0"></script>
+    <title>Game Center - Main Menu</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            max-width: 400px; 
-            margin: 0 auto; 
-            padding: 20px;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            padding: 20px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
         }
-        
         .container {
             background: white;
-            padding: 40px 30px;
+            padding: 40px;
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
             width: 100%;
         }
-        
-        .logo {
-            text-align: center;
-            font-size: 32px;
-            font-weight: bold;
+        h1 {
             color: #333;
             margin-bottom: 10px;
+            font-size: 2.5em;
         }
-        
         .subtitle {
-            text-align: center;
             color: #666;
             margin-bottom: 30px;
-            font-size: 14px;
+            font-size: 1.1em;
         }
-        
-        .form-group { 
-            margin-bottom: 25px; 
+        .game-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 30px 0;
         }
-        
-        label { 
-            display: block; 
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-            font-size: 14px;
-        }
-        
-        input { 
-            width: 100%; 
-            padding: 15px; 
-            border: 2px solid #e1e5e9; 
-            border-radius: 10px; 
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
-        }
-        
-        input:focus {
-            border-color: #667eea;
-            outline: none;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        button { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white; 
-            padding: 18px; 
-            border: none; 
-            border-radius: 10px; 
+        .game-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
             cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-            font-weight: 600;
             transition: all 0.3s ease;
+        }
+        .game-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(40, 167, 69, 0.3);
+        }
+        .login-prompt {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .login-btn {
+            background: #667eea;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
             margin-top: 10px;
+            transition: all 0.3s ease;
         }
-        
-        button:hover:not(:disabled) {
+        .login-btn:hover {
+            background: #5a6fd8;
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-        
-        button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .error { 
-            color: #dc3545; 
-            background: #ffeaea;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 4px solid #dc3545;
-            font-size: 14px;
-        }
-        
-        .success { 
-            color: #28a745; 
-            background: #f0fff4;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 4px solid #28a745;
-            font-size: 14px;
-        }
-        
-        .login-link {
-            text-align: center;
-            margin-top: 25px;
-            color: #666;
-            font-size: 14px;
-        }
-        
-        a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        
-        a:hover {
-            text-decoration: underline;
-        }
-        
-        .password-requirements {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
         }
     </style>
-    </head>
+</head>
 <body>
     <div class="container">
-        <div class="logo">🔐 WebLogin</div>
-        <div class="subtitle">Buat akun baru Anda</div>
+        <h1>🎮 Game Center</h1>
+        <div class="subtitle">Pilih game yang ingin dimainkan</div>
         
-        <div id="message"></div>
-        
-        <form id="registerForm">
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" placeholder="contoh@email.com" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" placeholder="Minimal 6 karakter" required minlength="6">
-                <div class="password-requirements">Password harus minimal 6 karakter</div>
-            </div>
-            
-            <button type="submit" id="submitBtn">Daftar Sekarang</button>
-        </form>
-        
-        <div class="login-link">
-            Sudah punya akun? <a href="login.html">Login di sini</a>
+        <div class="game-list">
+            <button class="game-btn" onclick="playMahjong()">
+                🀄 Main Mahjong
+            </button>
+            <button class="game-btn" onclick="comingSoon()">
+            </button>
+            <button class="game-btn" onclick="comingSoon()">
+            </button>
+        </div>
+
+        <div class="login-prompt">
+            <p>💡 <strong>Login untuk menyimpan score & progress!</strong></p>
+            <button class="login-btn" onclick="goToLogin()">Login / Daftar</button>
         </div>
     </div>
 
-    <!-- Load config.js -->
-    <script src="js/config.js"></script>
-    
     <script>
-        // Tunggu sampai DOM siap
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('registerForm');
-            const submitBtn = document.getElementById('submitBtn');
-            const messageDiv = document.getElementById('message');
-            
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const email = document.getElementById('email').value.trim();
-                const password = document.getElementById('password').value;
-                
-                // Validasi dasar
-                if (!email || !password) {
-                    showMessage('❌ Harap isi semua field', 'error');
-                    return;
-                }
-                
-                if (password.length < 6) {
-                    showMessage('❌ Password harus minimal 6 karakter', 'error');
-                    return;
-                }
-                
-                // Show loading state
-                submitBtn.textContent = 'Mendaftarkan...';
-                submitBtn.disabled = true;
-                
-                try {
-                    console.log('Attempting registration...');
-                    const { data, error } = await window.supabase.auth.signUp({
-                        email: email,
-                        password: password
-                    });
-                    
-                    if (error) {
-                        console.error('Registration error:', error);
-                        throw error;
-                    }
-                    
-                    console.log('Registration success:', data);
-                    showMessage('✅ Registrasi berhasil! Silakan cek email Anda untuk verifikasi.', 'success');
-                    form.reset();
-                    
-                } catch (error) {
-                    console.error('Catch error:', error);
-                    let errorMessage = 'Terjadi kesalahan saat registrasi';
-                    
-                    if (error.message.includes('already registered')) {
-                        errorMessage = 'Email sudah terdaftar';
-                    } else if (error.message.includes('invalid email')) {
-                        errorMessage = 'Format email tidak valid';
-                    } else if (error.message.includes('password')) {
-                        errorMessage = 'Password terlalu lemah';
-                    } else {
-                        errorMessage = error.message;
-                    }
-                    
-                    showMessage('❌ ' + errorMessage, 'error');
-                } finally {
-                    // Reset button state
-                    submitBtn.textContent = 'Daftar Sekarang';
-                    submitBtn.disabled = false;
-                }
-            });
-            
-            function showMessage(message, type) {
-                messageDiv.innerHTML = message;
-                messageDiv.className = type;
-                
-                // Auto hide success message after 5 seconds
-                if (type === 'success') {
-                    setTimeout(() => {
-                        messageDiv.innerHTML = '';
-                        messageDiv.className = '';
-                    }, 5000);
-                }
-            }
-        });
+        function playMahjong() {
+            // Cek dulu apakah user sudah login
+            alert('🎮 Memuat game Mahjong...\n\nLogin dulu untuk menyimpan progress!');
+            goToLogin();
+        }
+
+        function comingSoon() {
+            alert('Game sedang dalam pengembangan!');
+        }
+
+        function goToLogin() {
+            window.location.href = 'login.html';
+        }
     </script>
 </body>
 </html>
