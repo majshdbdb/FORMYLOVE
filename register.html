@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrasi - Web Login</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.0"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            max-width: 500px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            margin: 20px auto;
+        }
+        
+        .logo {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        label { 
+            display: block; 
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        input, select { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid #e1e5e9; 
+            border-radius: 10px; 
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        input:focus, select:focus {
+            border-color: #667eea;
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; 
+            padding: 15px; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .error { 
+            color: #dc3545; 
+            background: #ffeaea;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #dc3545;
+            font-size: 14px;
+        }
+        
+        .success { 
+            color: #28a745; 
+            background: #f0fff4;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #28a745;
+            font-size: 14px;
+        }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        .password-requirements {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .bank-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 8px;
+        }
+        
+        .bank-option {
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            font-size: 12px;
+        }
+        
+        .bank-option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .bank-option:hover {
+            border-color: #667eea;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin: 25px 0 15px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🔐 WebLogin</div>
+        <div class="subtitle">Lengkapi data diri untuk registrasi</div>
+        
+        <div id="message"></div>
+        
+        <form id="registerForm">
+            <div class="section-title">Informasi Akun</div>
+            
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" placeholder="6-14 digit atau kombinasi huruf" required pattern="[a-zA-Z0-9]{6,14}" title="Username harus 6-14 karakter (huruf dan angka)">
+                <div class="password-requirements">Username harus 6-14 karakter (huruf dan angka)</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" placeholder="contoh@email.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Nomor Ponsel:</label>
+                <input type="tel" id="phone" placeholder="Contoh: 081234567890" required pattern="[0-9]{10,13}" title="Masukkan nomor ponsel yang valid">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" placeholder="Minimal 6 karakter" required minlength="6">
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">Konfirmasi Password:</label>
+                    <input type="password" id="confirmPassword" placeholder="Ulangi password" required minlength="6">
+                </div>
+            </div>
+            <div class="password-requirements">Password harus minimal 6 karakter (huruf dan angka)</div>
+            
+            <div class="section-title">Informasi Bank</div>
+            
+            <div class="form-group">
+                <label>Pilih Bank:</label>
+                <div class="bank-grid" id="bankGrid">
+                    <div class="bank-option" data-bank="SEABANK">SEABANK</div>
+                    <div class="bank-option" data-bank="JAGO">JAGO</div>
+                    <div class="bank-option" data-bank="BCA">BCA</div>
+                    <div class="bank-option" data-bank="BSI">BSI</div>
+                    <div class="bank-option" data-bank="BRI">BRI</div>
+                    <div class="bank-option" data-bank="BNI">BNI</div>
+                    <div class="bank-option" data-bank="CIMB">CIMB</div>
+                    <div class="bank-option" data-bank="DANAMON">DANAMON</div>
+                    <div class="bank-option" data-bank="DANA">DANA</div>
+                    <div class="bank-option" data-bank="GOPAY">GOPAY</div>
+                    <div class="bank-option" data-bank="LINKAJA">LINKAJA</div>
+                    <div class="bank-option" data-bank="MANDIRI">MANDIRI</div>
+                    <div class="bank-option" data-bank="MAYBANK">MAYBANK</div>
+                    <div class="bank-option" data-bank="OVO">OVO</div>
+                </div>
+                <input type="hidden" id="selectedBank" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="accountName">Nama Rekening:</label>
+                <input type="text" id="accountName" placeholder="Nama pemilik rekening" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="accountNumber">Nomor Rekening:</label>
+                <input type="text" id="accountNumber" placeholder="Nomor rekening bank" required pattern="[0-9]+" title="Hanya angka yang diperbolehkan">
+            </div>
+            
+            <div class="form-group">
+                <label for="referral">Kode Referral (Opsional):</label>
+                <input type="text" id="referral" placeholder="Masukkan kode referral jika ada">
+            </div>
+            
+            <button type="submit" id="submitBtn">Daftar Sekarang</button>
+        </form>
+        
+        <div class="login-link">
+            Sudah punya akun? <a href="login.html">Login di sini</a>
+        </div>
+    </div>
+
+    <!-- Load config.js -->
+    <script src="js/config.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('registerForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const messageDiv = document.getElementById('message');
+            const bankOptions = document.querySelectorAll('.bank-option');
+            const selectedBankInput = document.getElementById('selectedBank');
+            
+            // Bank selection logic
+            bankOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    bankOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedBankInput.value = this.dataset.bank;
+                });
+            });
+            
+            // Password confirmation validation
+            document.getElementById('confirmPassword').addEventListener('input', function() {
+                const password = document.getElementById('password').value;
+                const confirmPassword = this.value;
+                
+                if (confirmPassword && password !== confirmPassword) {
+                    this.style.borderColor = '#dc3545';
+                } else {
+                    this.style.borderColor = '#28a745';
+                }
+            });
+            
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Collect form data
+                const formData = {
+                    username: document.getElementById('username').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    phone: document.getElementById('phone').value.trim(),
+                    password: document.getElementById('password').value,
+                    confirmPassword: document.getElementById('confirmPassword').value,
+                    bank: selectedBankInput.value,
+                    accountName: document.getElementById('accountName').value.trim(),
+                    accountNumber: document.getElementById('accountNumber').value.trim(),
+                    referral: document.getElementById('referral').value.trim()
+                };
+                
+                // Validation
+                if (!validateForm(formData)) {
+                    return;
+                }
+                
+                // Show loading state
+                submitBtn.textContent = 'Mendaftarkan...';
+                submitBtn.disabled = true;
+                
+                try {
+                    console.log('Attempting registration...');
+                    
+                    // 1. Register user with Supabase Auth
+                    const { data: authData, error: authError } = await window.supabase.auth.signUp({
+                        email: formData.email,
+                        password: formData.password,
+                        options: {
+                            data: {
+                                username: formData.username,
+                                phone: formData.phone
+                            }
+                        }
+                    });
+                    
+                    if (authError) {
+                        throw authError;
+                    }
+                    
+                    // 2. Save additional user data to profiles table
+                    if (authData.user) {
+                        const { error: profileError } = await window.supabase
+                            .from('profiles')
+                            .insert([
+                                {
+                                    id: authData.user.id,
+                                    username: formData.username,
+                                    email: formData.email,
+                                    phone: formData.phone,
+                                    bank_name: formData.bank,
+                                    account_name: formData.accountName,
+                                    account_number: formData.accountNumber,
+                                    referral_code: formData.referral,
+                                    created_at: new Date().toISOString()
+                                }
+                            ]);
+                            
+                        if (profileError) {
+                            console.error('Profile error:', profileError);
+                            // Continue anyway as auth is successful
+                        }
+                        
+                        // 3. Create wallet for user
+                        const { error: walletError } = await window.supabase
+                            .from('wallets')
+                            .insert([
+                                {
+                                    user_id: authData.user.id,
+                                    current_balance: 0
+                                }
+                            ]);
+                            
+                        if (walletError) {
+                            console.error('Wallet error:', walletError);
+                        }
+                    }
+                    
+                    console.log('Registration success:', authData);
+                    showMessage('✅ Registrasi berhasil! Silakan cek email Anda untuk verifikasi.', 'success');
+                    form.reset();
+                    bankOptions.forEach(opt => opt.classList.remove('selected'));
+                    selectedBankInput.value = '';
+                    
+                } catch (error) {
+                    console.error('Registration error:', error);
+                    let errorMessage = 'Terjadi kesalahan saat registrasi';
+                    
+                    if (error.message.includes('already registered')) {
+                        errorMessage = 'Email sudah terdaftar';
+                    } else if (error.message.includes('invalid email')) {
+                        errorMessage = 'Format email tidak valid';
+                    } else if (error.message.includes('password')) {
+                        errorMessage = 'Password terlalu lemah';
+                    } else {
+                        errorMessage = error.message;
+                    }
+                    
+                    showMessage('❌ ' + errorMessage, 'error');
+                } finally {
+                    submitBtn.textContent = 'Daftar Sekarang';
+                    submitBtn.disabled = false;
+                }
+            });
+            
+            function validateForm(data) {
+                // Check if all required fields are filled
+                if (!data.username || !data.email || !data.phone || !data.password || 
+                    !data.bank || !data.accountName || !data.accountNumber) {
+                    showMessage('❌ Harap isi semua field yang wajib', 'error');
+                    return false;
+                }
+                
+                // Check username length
+                if (data.username.length < 6 || data.username.length > 14) {
+                    showMessage('❌ Username harus 6-14 karakter', 'error');
+                    return false;
+                }
+                
+                // Check password match
+                if (data.password !== data.confirmPassword) {
+                    showMessage('❌ Password dan konfirmasi password tidak cocok', 'error');
+                    return false;
+                }
+                
+                // Check password length
+                if (data.password.length < 6) {
+                    showMessage('❌ Password harus minimal 6 karakter', 'error');
+                    return false;
+                }
+                
+                return true;
+            }
+            
+            function showMessage(message, type) {
+                messageDiv.innerHTML = message;
+                messageDiv.className = type;
+                
+                if (type === 'success') {
+                    setTimeout(() => {
+                        messageDiv.innerHTML = '';
+                        messageDiv.className = '';
+                    }, 5000);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
