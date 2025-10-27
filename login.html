@@ -1,44 +1,269 @@
-// Show loading
-            button.textContent = 'Logging in...';
-            button.disabled = true;
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Web Login</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.0"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            max-width: 400px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+        }
+        
+        .logo {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .form-group { 
+            margin-bottom: 25px; 
+        }
+        
+        label { 
+            display: block; 
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        input { 
+            width: 100%; 
+            padding: 15px; 
+            border: 2px solid #e1e5e9; 
+            border-radius: 10px; 
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        input:focus {
+            border-color: #28a745;
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+        
+        button { 
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white; 
+            padding: 18px; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(40, 167, 69, 0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .error { 
+            color: #dc3545; 
+            background: #ffeaea;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #dc3545;
+            font-size: 14px;
+        }
+        
+        .success { 
+            color: #28a745; 
+            background: #f0fff4;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+            font-size: 14px;
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 25px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        .forgot-password {
+            text-align: right;
+            margin-top: -15px;
+            margin-bottom: 20px;
+        }
+                .forgot-password a {
+            font-size: 13px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🔐 WebLogin</div>
+        <div class="subtitle">Masuk ke akun Anda</div>
+        
+        <div id="message"></div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" placeholder="contoh@email.com" required>
+            </div>
             
-            try {
-                const { data, error } = await window.supabase.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" placeholder="Masukkan password" required>
+                <div class="forgot-password">
+                    <a href="#" onclick="alert('Fitur lupa password belum tersedia')">Lupa password?</a>
+                </div>
+            </div>
+            
+            <button type="submit" id="submitBtn">Login</button>
+        </form>
+        
+        <div class="register-link">
+            Belum punya akun? <a href="index.html">Daftar di sini</a>
+        </div>
+    </div>
+
+    <!-- Load config.js -->
+    <script src="js/config.js"></script>
+    
+    <script>
+        // Tunggu sampai DOM siap
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('loginForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const messageDiv = document.getElementById('message');
+            
+            // Cek apakah user sudah login
+            checkExistingSession();
+            
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
                 
-                if (error) throw error;
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
                 
-                showMessage('✅ Login berhasil! Mengalihkan...', 'success');
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1000);
+                // Validasi dasar
+                if (!email || !password) {
+                    showMessage('❌ Harap isi semua field', 'error');
+                    return;
+                }
                 
-            } catch (error) {
-                showMessage('❌ Login gagal: ' + error.message, 'error');
-            } finally {
-                button.textContent = originalText;
-                button.disabled = false;
+                // Show loading state
+                submitBtn.textContent = 'Masuk...';
+                submitBtn.disabled = true;
+                
+                try {
+                    console.log('Attempting login...');
+                    const { data, error } = await window.supabase.auth.signInWithPassword({
+                        email: email,
+                        password: password
+                    });
+                    
+                    if (error) {
+                        console.error('Login error:', error);
+                        throw error;
+                    }
+                    
+                    console.log('Login success:', data);
+                    showMessage('✅ Login berhasil! Mengalihkan...', 'success');
+                    
+                    // Redirect setelah 1 detik
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                    
+                } catch (error) {
+                    console.error('Catch error:', error);
+                    let errorMessage = 'Terjadi kesalahan saat login';
+                    
+                    if (error.message.includes('Invalid login credentials')) {
+                        errorMessage = 'Email atau password salah';
+                    } else if (error.message.includes('Email not confirmed')) {
+                        errorMessage = 'Email belum diverifikasi. Silakan cek email Anda';
+                    } else {
+                        errorMessage = error.message;
+                    }
+                    
+                    showMessage('❌ ' + errorMessage, 'error');
+                            } finally {
+                    // Reset button state
+                    submitBtn.textContent = 'Login';
+                    submitBtn.disabled = false;
+                }
+            });
+            
+            async function checkExistingSession() {
+                try {
+                    const { data: { session } } = await window.supabase.auth.getSession();
+                    if (session) {
+                        console.log('User already logged in, redirecting...');
+                        window.location.href = 'dashboard.html';
+                    }
+                } catch (error) {
+                    console.error('Error checking session:', error);
+                }
+            }
+            
+            function showMessage(message, type) {
+                messageDiv.innerHTML = message;
+                messageDiv.className = type;
             }
         });
-        
-        function showMessage(message, type) {
-            const messageDiv = document.getElementById('message');
-            messageDiv.innerHTML = message;
-            messageDiv.className = type;
-        }
-
-        // Check if user is already logged in
-        async function checkExistingSession() {
-            const { data: { session } } = await window.supabase.auth.getSession();
-            if (session) {
-                window.location.href = 'dashboard.html';
-            }
-        }
-
-        // Check session on page load
-        checkExistingSession();
     </script>
 </body>
 </html>
